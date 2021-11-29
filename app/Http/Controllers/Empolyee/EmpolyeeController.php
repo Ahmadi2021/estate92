@@ -73,6 +73,7 @@ class EmpolyeeController extends Controller
                 'parent_id' => auth()->user()->id,
                 'agency_id' => $agency->id,
             ]);
+            // here i create employee 
             $user->empolyee()->create($request->only((new User)->getFillable()));
            
         }
