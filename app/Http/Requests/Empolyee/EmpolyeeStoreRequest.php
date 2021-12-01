@@ -28,6 +28,7 @@ class EmpolyeeStoreRequest extends FormRequest
             'phone_number' => ['required', 'unique:employees,phone_number'],
             'cnic' => ['required', 'unique:employees,cnic'],
             'name' => ['required' ],
+            'email' => ['required', 'email', 'unique:users,email'],
             'gender' => ['required'],
             'dob'   =>['required'],
             'level' => ['required'],

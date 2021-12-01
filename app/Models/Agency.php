@@ -23,7 +23,7 @@ class Agency extends Model
     }
 
      public function empolyee(){
-          return $this->hasMany(Employee::class);
+          return $this->hasMany(Employee::class,'agency_id');
     }
 
      public function projects(){

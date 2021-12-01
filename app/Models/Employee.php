@@ -26,10 +26,10 @@ class Employee extends Model
     ];
 
      public function user(){
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'user_id');
     }
      public function agency(){
-        return $this->belongsTo(Agency::class);
+        return $this->belongsTo(Agency::class,'agency_id');
     }
      
      public function properties(){
@@ -39,6 +39,11 @@ class Employee extends Model
      public function projects(){
         return $this->hasMany(Project::class);
     }
+
+    public function childs(){
+        return $this->hasMany(Employee::class, 'parent_id');
+    }
+
 
     
     
