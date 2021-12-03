@@ -22,7 +22,8 @@ class CreateProjectsTable extends Migration
             $table->boolean('is_active')->default(false);
             $table->string('phone_number');
             $table->string('address');
-            $table->foreignId('user_id')->constrained('users');
+            $table->morphs('porojectable');
+            $table->foreignId('employee_id')->constrained('employees');
             $table->timestamps();
         });
     }

@@ -13,7 +13,7 @@ class EmpolyeeStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return auth()->user()->hasPermissionTo('create-employee');
         // return auth()->user()->hasPermissionTo('create-empolyee');
     }
 

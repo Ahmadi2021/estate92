@@ -49,7 +49,7 @@ Route::post('register',[\App\Http\Controllers\auth\RegisterController::class,'re
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::apiResource('/projects' ,  ProjectController::class );
-    route::apiResource('/floors', FloorController::class );
+    Route::apiResource('/floors', FloorController::class );
     Route::apiResource('/units', UnitController::class );
     Route::apiResource('/properties' , PropertyController::class);
     Route::apiResource('/empolyee', EmpolyeeController::class);

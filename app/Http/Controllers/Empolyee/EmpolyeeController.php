@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Empolyee;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Empolyee\EmpolyeeDeleteRequest;
 use App\Http\Requests\Empolyee\EmpolyeeIndexRequest;
+use App\Http\Requests\Empolyee\EmpolyeeShowRequest;
 use App\Http\Requests\Empolyee\EmpolyeeStoreRequest;
+use App\Http\Requests\Empolyee\EmpolyeeUpdateRequest;
 use App\Http\Requests\UserStoreRequest;
 use App\Models\Agency;
 use App\Models\Employee;
@@ -24,23 +27,35 @@ class EmpolyeeController extends Controller
      */
     public function index(EmpolyeeIndexRequest $request)
     {
-//////////////////GET ALL SALE HEAD  ////////////////////////////////
         if(auth()->user()->hasRole('agency')){
-           $employees = auth()->user()->agency->employee()->get();
-           
-           return response()->json(['message'=>$employees]);
-        }
-///////// Get ALL SALE MANAGER////////////////////////////////////
+            // $employees = auth()->user()->agency->employees()->find(10)->childs()->get();
+            $agency = auth()->user()->agency;
+            if(!$agency)
+                return response()->json(['message' => 'No agency found.']);
 
-        elseif(auth()->user()->hasRole('sale-head')){
-            $employees = Employee::where('level','=', 2)->get();
-                 return response()->json(['message'=>$employees]);
 
-        }
-///////// Get ALL CSR/////////////////////////////////////////////
-        elseif(auth()->user()->hasRole('sale-manager')){
-             $employees = Employee::where('level','=', 3)->get();
-           return response()->json(['message'=>$employees]);
+            $employees = $agency->employees()->get();
+            if(!$employees)
+                return response()->json(['message' => 'No employees found.']);
+
+
+            return response()->json(['data' => $employees]);
+
+        }elseif(auth()->user()->hasRole('sale-head') || auth()->user()->hasRole('sale-manager') ){
+         
+            $employees = auth()->user()->employee;
+            
+            if(!$employees)
+                return response()->json(['message' => 'No employees found.']);
+
+
+            $childs = $employees->childs()->get();
+            if(!$childs){
+                 return response()->json(['message' => 'Not  found.']);
+            }
+               
+
+            return response()->json(['data' => $childs]);
         }
     }
 
@@ -125,24 +140,39 @@ class EmpolyeeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+
+
+
+
+/////////////////////   Show Function
+
+
+public function show( EmpolyeeShowRequest $request , $id)
     {
         if(auth()->user()->hasRole('agency')){
-            return auth()->user()->agency->employees()->get();
+           $agency = auth()->user()->agency;
+           if(!$agency){
+                return response()->json(['message' => 'Agency Not Found']);
+           }
+            $employee = $agency->employees()->find($id);
+            if(!$employee){
+                return response()->json(['message' => 'Employee Not Found']);
+            }
+            return response()->json(['message' => $employee]);
         }
         elseif(auth()->user()->hasRole('sale-head') || auth()->user()->hasRole('sale-manager')){
-            return auth()->user()->employee->with('childs.childs')->get();
+
+            $employee =  auth()->user()->employee;
+              if(!$employee){
+                return response()->json(['message' => 'Not Found']);
+               }
+               $child = $employee->childs()->find($id);
+               if(!$child){
+                   return response()->json(['message' => 'Child Not Found']);
+               }
+            return response()->json(['message' => $child]);
         }
-        // $request_emp = Employee::find($id);
-        // if(!$request_emp){
-        //     return response()->json(['message'=> 'NOt Found']);
-        // }
-        // $auth_emp = auth()->user()->empolyee;
-        // if($auth_emp->level == $request_emp->level ){
-        //     return response()->json(['message'=> $request_emp]);
-        // }else{
-        //     return response()->json(['message'=> 'NO autherization']);
-        // }
+      
     }
 
     /**
@@ -163,8 +193,39 @@ class EmpolyeeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
+
+
+
+
+    /////////////////////   Update Function 
+    public function update(EmpolyeeUpdateRequest $request, $id)
+    {   
+        if(auth()->user()->hasRole('agency')){
+            $agency = auth()->user()->agency;
+            if(!$agency){
+                return response()->json(['data' => 'Agency Not Found']);
+                
+            }
+            $employee = $agency->employees()->find($id);
+            if(!$employee){
+                return response()->json(['data' => 'Employee  Not Found']);
+            }
+            $employee->update($request->only((new Employee)->getFillable()));
+            return response()->json(['message' => 'Updated Successfully']);
+
+        }elseif(auth()->user()->hasRole('sale-head') || auth()->user()->hasRole('sale-manager')){
+
+            $employee = auth()->user()->employee;
+            if(!$employee){
+                return response()->json(['message' => 'Employee  Not Found']);
+            }
+            $emp_child =  $employee->childs();
+            if(!$emp_child){
+                return response()->json(['message' => '  Not Found']);
+            }
+            $emp_child->update($request->only((new Employee)->getFillable()));
+            return response()->json(['message' => '  Not Found']);
+        }
         
     }
 
@@ -174,8 +235,45 @@ class EmpolyeeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        //
+
+
+
+
+/////////////////////   Delete Function 
+    public function destroy(EmpolyeeDeleteRequest $request, $id)
+    {   
+    
+        if(auth()->user()->hasRole('agency')){
+             $agency = auth()->user()->agency;
+             
+           if(!$agency){
+                return response()->json(['message' => 'Agency Not Found']);
+           }
+
+            $employee = $agency->employees()->find($id);
+            if(!$employee){
+                return response()->json(['message' => 'Employee Not Found']);
+            
+            }
+
+            $employee->delete();
+            return response()->json(['message' => 'Deleted Successfully']);
+
+
+        }elseif(auth()->user()->hasRole('sale-head') || auth()->user()->hasRole('sale-manager')){
+            $employee =  auth()->user()->employee;
+              if(!$employee){
+                return response()->json(['message' => 'Not Found']);
+               }
+               $child = $employee->childs()->find($id);
+               if(!$child){
+                   return response()->json(['message' => 'Child Not Found']);
+               }
+             
+            $employee->delete();
+            return response()->json(['message' => 'Deleted Successfully']);
+        } 
+        
     }
-}
+ }
+

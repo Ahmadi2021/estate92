@@ -22,11 +22,16 @@ class Agency extends Model
         return $this->belongsTo(User::class);
     }
 
-     public function empolyee(){
+     public function employees(){
           return $this->hasMany(Employee::class,'agency_id');
     }
 
-     public function projects(){
-          return $this->hasMany(Project::class);
+    //  public function projects(){
+    //       return $this->hasMany(Project::class);
+    // }
+
+    public function projects(){
+
+        return $this->morphMany(Project::class,'commentable');
     }
 }

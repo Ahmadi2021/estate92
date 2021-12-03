@@ -91,12 +91,12 @@ class RolesAndPermissionsSeeder extends Seeder
         // Permission::firstOrCreate(['name'=>'update-image']);
         // Permission::firstOrCreate(['name'=>'delete-image']);
 
-        // Empolyee 
-        Permission::create(['name' => 'view-all-empolyees']);
-        Permission::create(['name' => 'view-empolyee']);
-        Permission::create(['name' => 'update-empolyee']);
-        Permission::create(['name' => 'create-empolyee']);
-        Permission::create(['name' => 'delete-empolyee']);
+        // employee 
+        Permission::firstOrCreate(['name' => 'view-all-employees']);
+        Permission::firstOrCreate(['name' => 'view-employee']);
+        Permission::firstOrCreate(['name' => 'update-employee']);
+        Permission::firstOrCreate(['name' => 'create-employee']);
+        Permission::firstOrCreate(['name' => 'delete-employee']);
 
 
 
@@ -141,12 +141,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-all-blogs',
             'view-blog',
 
-           //Permissions for Empolyee
-            'view-all-empolyees',
-            'view-empolyee',
-            'create-empolyee',
-            'update-empolyee',
-            'delete-empolyee',
+           //Permissions for employee
+            'view-all-employees',
+            'view-employee',
+            'create-employee',
+            'update-employee',
+            'delete-employee',
 
             
             
@@ -185,6 +185,9 @@ class RolesAndPermissionsSeeder extends Seeder
             // permissions for blogs 
             'view-all-blogs',
             'view-blog',
+            // Permissions For Employees
+            'view-all-employees',
+            'view-employee',
         ]);
 
         $this->sale_head->givePermissionTo([
@@ -220,6 +223,10 @@ class RolesAndPermissionsSeeder extends Seeder
             // permissions for blogs 
             'view-all-blogs',
             'view-blog',
+            
+            // Permissions For Employees
+            'view-all-employees',
+            'view-employee',
         ]);
 
         $this->csr->givePermissionTo([

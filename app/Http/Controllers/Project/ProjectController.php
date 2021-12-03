@@ -29,7 +29,9 @@ class ProjectController extends Controller
     {
 
         // return auth()->user();
-    
+        if(auth()->user()->hasRole('agency')){
+            auth()->users()->agency;
+        }
         $projects = auth()->user()->projects()->selectProjects()->get();
                             // ->active() //this is scope function [inside model Project]
                             // ->latest()
@@ -56,8 +58,21 @@ class ProjectController extends Controller
 
    
     public function store(ProjectStoreRequest $request)
-    {
-        $project = auth()->user()->projects()->create($request->only((new Project)->getFillable()));
+    {  
+        if(auth()->user()->hasRole('agency')){
+          $agency =  auth()->user()->agency;
+          if(!$agency){
+              return response()->json(['message'=>'Agency Not Found']);
+          }
+          $project= $agency->projects()->create($request->only((new Project)->getFillable()));
+
+         
+        }elseif(auth()->user()->hasRole('sale-head')|| auth()->user()->hasRole('sale-manager')){
+
+
+
+        }
+       
         $image_path = "/public/images/project/";
         $project_images = $this->multi_image_upload($request->project_images, $image_path,$project->id,Project::class);
 
@@ -155,7 +170,7 @@ class ProjectController extends Controller
         }
         $project->delete();
         
-        //    return redirect('/projects')->with(['message' => 'Successfully Deleted']);
+        //return redirect('/projects')->with(['message' => 'Successfully Deleted']);
         return response()->json(['message'=>'Deleted successfully']);
     }
 }

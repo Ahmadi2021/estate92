@@ -13,7 +13,7 @@ class EmpolyeeUpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return auth()->user()->hasPermissionTo('update-employee');
     }
 
     /**

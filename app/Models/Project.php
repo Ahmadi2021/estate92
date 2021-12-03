@@ -22,9 +22,7 @@ class Project extends Model
         'address',
     ];
 
-    public function user(){
-        return $this->belongsTo(User::class);
-    }
+ 
     public function floors(){
         return $this->hasMany(Floor::class);
     }
@@ -42,6 +40,10 @@ class Project extends Model
     }
     public function employee(){
         return $this->belongsTo(Employee::class);
+    }
+
+    public function projectable(){
+        return $this->morphTo();
     }
 
 

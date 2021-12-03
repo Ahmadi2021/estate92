@@ -36,13 +36,20 @@ class Employee extends Model
         return $this->hasMany(Property::class);
     }
 
-     public function projects(){
-        return $this->hasMany(Project::class);
-    }
+    //  public function projects(){
+    //     return $this->hasMany(Project::class);
+    // }
 
     public function childs(){
         return $this->hasMany(Employee::class, 'parent_id');
     }
+
+     public function projects(){
+         
+        return $this->morphMany(Project::class,'commentable');
+     }
+
+  
 
 
     
