@@ -45,8 +45,7 @@ class Employee extends Model
     }
 
      public function projects(){
-         
-        return $this->morphMany(Project::class,'commentable');
+        return $this->morphMany(Project::class,'projectable');
      }
 
   

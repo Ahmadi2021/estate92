@@ -7,6 +7,7 @@ use App\Http\Requests\ProjectIndexRequest;
 use App\Http\Requests\Projects\ProjectShowRequest;
 use App\Http\Requests\ProjectStoreRequest;
 use App\Http\Requests\ProjectUpdateRequest;
+use App\Models\Agency;
 use App\Models\Floor;
 use App\Models\Project;
 use App\Models\Unit;
@@ -41,7 +42,7 @@ class ProjectController extends Controller
             return response()->json(['message' => 'No projects found.']);
         return response()->json(['data' => $projects]);
     }
-
+ 
     /**
      * Show the form for creating a new resource.
      *
@@ -64,8 +65,13 @@ class ProjectController extends Controller
           if(!$agency){
               return response()->json(['message'=>'Agency Not Found']);
           }
-          $project= $agency->projects()->create($request->only((new Project)->getFillable()));
-
+          $request->merge([
+              'projectable_id'=>$agency->id,
+              'projectable_type' => Agency::class,
+          ]);
+         
+          $project = Project::create($request->only((new Project)->getFillable()));
+          
          
         }elseif(auth()->user()->hasRole('sale-head')|| auth()->user()->hasRole('sale-manager')){
 
@@ -74,14 +80,13 @@ class ProjectController extends Controller
         }
        
         $image_path = "/public/images/project/";
+        return $image_path;
         $project_images = $this->multi_image_upload($request->project_images, $image_path,$project->id,Project::class);
+        return $project_images;
 
         $project->images()->insert($project_images);
         
-        // return redirect('/projects')->with(['message' => 'Project Created successfully']);
-        if(!$project){
-            return response()->json(['message' => 'failed to create project']);
-        }
+        // return redirect('/projects')->with(['message' => 'Project Created successfully'])
             
         return response()->json(['message'=>'created successfully']);
 

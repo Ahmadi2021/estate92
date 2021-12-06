@@ -20,7 +20,11 @@ class Project extends Model
         'phone_number',
         'user_id',
         'address',
+        'projectable_id',
+        'projectable_type',
     ];
+
+   protected $guarded = [];
 
  
     public function floors(){
@@ -35,12 +39,12 @@ class Project extends Model
        return $this->morphMany(Image::class,'imageable'); 
     }
 
-   public function agency(){
-        return $this->belongsTo(Agency::class);
-    }
-    public function employee(){
-        return $this->belongsTo(Employee::class);
-    }
+//    public function agency(){
+//         return $this->belongsTo(Agency::class);
+//     }
+//     public function employee(){
+//         return $this->belongsTo(Employee::class);
+//     }
 
     public function projectable(){
         return $this->morphTo();
