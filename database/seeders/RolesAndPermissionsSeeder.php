@@ -188,6 +188,9 @@ class RolesAndPermissionsSeeder extends Seeder
             // Permissions For Employees
             'view-all-employees',
             'view-employee',
+            'create-employee',
+            'update-employee',
+            'delete-employee',
         ]);
 
         $this->sale_head->givePermissionTo([
@@ -227,6 +230,9 @@ class RolesAndPermissionsSeeder extends Seeder
             // Permissions For Employees
             'view-all-employees',
             'view-employee',
+            'create-employee',
+            'update-employee',
+            'delete-employee',
         ]);
 
         $this->csr->givePermissionTo([
@@ -253,6 +259,13 @@ class RolesAndPermissionsSeeder extends Seeder
             // permissions for blogs 
             'view-all-blogs',
             'view-blog',
+
+            // Permissions For Employees
+            'view-all-employees',
+            'view-employee',
+            'create-employee',
+            'update-employee',
+            'delete-employee',
         ]);
 
 

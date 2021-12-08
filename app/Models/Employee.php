@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin Builder
+ */
 class Employee extends Model
 {
-    
+
     use HasFactory;
     protected $fillable = [
         'user_id',
@@ -31,7 +35,7 @@ class Employee extends Model
      public function agency(){
         return $this->belongsTo(Agency::class,'agency_id');
     }
-     
+
      public function properties(){
         return $this->hasMany(Property::class);
     }
@@ -45,13 +49,13 @@ class Employee extends Model
     }
 
      public function projects(){
-        return $this->morphMany(Project::class,'projectable');
+        return $this->morphMany(Project::class,'ownerable');
      }
 
-  
 
 
-    
-    
+
+
+
 
 }

@@ -32,7 +32,7 @@ class ProjectStoreRequest extends FormRequest
 
             // floor fields 
             'project_images' => ['required', 'min:1'],
-            'project_images.*' => ['required', 'image', 'mimes:jpg,png,jpeg']
+            'project_images.*' => ['required', 'image', 'mimes:jpg,png,jpeg', "max:2048"]
         ];
     }
     

@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
-
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Comment;
 use App\Models\Image;
+
+/**
+ * @mixin Builder
+ */
 class Project extends Model
 {
     use HasFactory;
@@ -18,15 +22,9 @@ class Project extends Model
         'description',
         'code',
         'phone_number',
-        'user_id',
         'address',
-        'projectable_id',
-        'projectable_type',
     ];
 
-   protected $guarded = [];
-
- 
     public function floors(){
         return $this->hasMany(Floor::class);
     }
@@ -34,9 +32,9 @@ class Project extends Model
     public function commentable(){
         $this->morphMany(Comment::class,'commentable');
     }
-     
+
     public function images(){
-       return $this->morphMany(Image::class,'imageable'); 
+       return $this->morphMany(Image::class,'imageable');
     }
 
 //    public function agency(){
@@ -46,13 +44,13 @@ class Project extends Model
 //         return $this->belongsTo(Employee::class);
 //     }
 
-    public function projectable(){
+    public function ownerable(){
         return $this->morphTo();
     }
 
 
 
-    
+
     public function scopeActive(){
         return $this->where('is_active', 1);
     }
@@ -74,7 +72,7 @@ class Project extends Model
                            }])
                         //  Select For Project
                            ->select('id','name','description','user_id');
-                          
+
     }
 
 }

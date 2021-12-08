@@ -84,7 +84,7 @@ class EmpolyeeController extends Controller
             
         $user = User::create($request->only((new User)->getFillable()));
 
-     ////////////////////////////////Create Sale Head /////////////////////////
+     ////////////////////////////////Agency Create Sale Head /////////////////////////
 
         if(auth()->user()->hasRole('agency')){
             $agency = auth()->user()->agency;

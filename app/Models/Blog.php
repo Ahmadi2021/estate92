@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin Builder
+ */
 class Blog extends Model
 {
     use HasFactory;
@@ -12,7 +16,7 @@ class Blog extends Model
         'title',
         'description',
         'user_id',
-        
+
     ];
 
     public function user(){
@@ -24,6 +28,6 @@ class Blog extends Model
     }
 
     public function commentabl(){
-        return $this->morphMany(Comment::class,'commentable'); 
+        return $this->morphMany(Comment::class,'commentable');
      }
 }

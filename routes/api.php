@@ -28,17 +28,16 @@ use Illuminate\Support\Facades\Route;
 //    return $request->user();
 //});
 
-Route::apiResource('/users',UserController::class);
+Route::apiResource('/users', UserController::class);
 // Route::apiResource('/projects' ,  ProjectController::class );
 
 
-
-Route::apiResource('/blogs' , BlogController::class);
+Route::apiResource('/blogs', BlogController::class);
 Route::apiResource('/comments', CommentController::class);
 
 //  Public Route
-Route::post('login',[LoginController::class,'check_login']);
-Route::post('register',[\App\Http\Controllers\auth\RegisterController::class,'register']);
+Route::post('login', [LoginController::class, 'check_login']);
+Route::post('register', [\App\Http\Controllers\auth\RegisterController::class, 'register']);
 
 // Route::post('register');
 
@@ -48,11 +47,11 @@ Route::post('register',[\App\Http\Controllers\auth\RegisterController::class,'re
 // });
 
 Route::group(['middleware' => ['auth:api']], function () {
-    Route::apiResource('/projects' ,  ProjectController::class );
-    Route::apiResource('/floors', FloorController::class );
-    Route::apiResource('/units', UnitController::class );
-    Route::apiResource('/properties' , PropertyController::class);
-    Route::apiResource('/empolyee', EmpolyeeController::class);
+    Route::apiResource('/projects', ProjectController::class);
+    Route::apiResource('/floors', FloorController::class);
+    Route::apiResource('/units', UnitController::class);
+    Route::apiResource('/properties', PropertyController::class);
+    Route::apiResource('/employees', EmpolyeeController::class);
 });
 
 

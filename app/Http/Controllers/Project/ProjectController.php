@@ -15,12 +15,14 @@ use App\Models\User;
 use App\Services\ProjectService;
 use App\Traits\ImageUpload;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Request as FacadesRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class ProjectController extends Controller
 {
     use ImageUpload;
+
     /**
      * Display a listing of the resource.
      *
@@ -28,21 +30,49 @@ class ProjectController extends Controller
      */
     public function index(ProjectIndexRequest $request, ProjectService $project_service)
     {
-
-        // return auth()->user();
-        if(auth()->user()->hasRole('agency')){
-            auth()->users()->agency;
-        }
-        $projects = auth()->user()->projects()->selectProjects()->get();
-                            // ->active() //this is scope function [inside model Project]
-                            // ->latest()
-                           
+       
+  ///////////////////////Agency Projects///////////////////////
+  
+        if (auth()->user()->hasRole('agency')) {
+            $agency= auth()->user()->agency;
+            if(!$agency){
+                return response()->json(['message' => 'No Agency found.']);
+            }
+            $projects = $agency->projects()->get();
+             if (!$projects){
+                 return response()->json(['message' => 'No Projects found.']);
+             }
+                
     
-        if(!$projects)
-            return response()->json(['message' => 'No projects found.']);
+        }
+ ///////////////////////sale-manager , sale-header , csr Projects///////////////////////       
+        elseif(auth()->user()->hasRole('sale-manager') || auth()->user()->hasRole('sale-head') ||
+         auth()->user()->hasRole('csr')){
+
+            $employee = auth()->user()->employee;
+            if(!$employee){
+                return response()->json(['message' => 'Employee found.']);
+            }
+
+            $projects = $employee->projects()->get();
+             if (!$projects){
+                 return response()->json(['message' => 'No Projects found.']);
+             }
+ 
+  ///////////////////////   Customer     ///////////////////////                 
+        }else{
+
+            $projects = Project::all();
+        }
+
         return response()->json(['data' => $projects]);
     }
- 
+
+
+
+
+
+
     /**
      * Show the form for creating a new resource.
      *
@@ -50,77 +80,108 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        $users = User::select('id','name')->get();
-        $project_id =Project::latest()->first()->id;
-      
+        $users = User::select('id', 'name')->get();
+        $project_id = Project::latest()->first()->id;
 
-        return view('projects.create_project')->with(['users' => $users , 'project_id' => $project_id+1]);
+
+        return view('projects.create_project')->with(['users' => $users, 'project_id' => $project_id + 1]);
     }
 
-   
+
     public function store(ProjectStoreRequest $request)
-    {  
-        if(auth()->user()->hasRole('agency')){
-          $agency =  auth()->user()->agency;
-          if(!$agency){
-              return response()->json(['message'=>'Agency Not Found']);
-          }
-          $request->merge([
-              'projectable_id'=>$agency->id,
-              'projectable_type' => Agency::class,
-          ]);
-         
-          $project = Project::create($request->only((new Project)->getFillable()));
-          
-         
-        }elseif(auth()->user()->hasRole('sale-head')|| auth()->user()->hasRole('sale-manager')){
-
-
-
-        }
-       
-        $image_path = "/public/images/project/";
-        return $image_path;
-        $project_images = $this->multi_image_upload($request->project_images, $image_path,$project->id,Project::class);
-        return $project_images;
-
-        $project->images()->insert($project_images);
-        
-        // return redirect('/projects')->with(['message' => 'Project Created successfully'])
+    {
+        // ini_set('max_execution_time', 4);
+        if (auth()->user()->hasRole('agency')) {
+            $agency = auth()->user()->agency;
             
-        return response()->json(['message'=>'created successfully']);
+            if(!$agency) {
+                return response()->json(['message' => 'Agency Not Found']);
+            }
+            // $request->merge([
+            //     'projectable_id' => $agency->id,
+            //     'projectable_type' => Agency::class,
+            // ]);
+            
+            
+            return auth()->user()->agency->projects()->create($request->all());
+            $project = $agency->projects()->create($request->only((new Project)->getFillable()));
+            return "created";
+        }
+        elseif (auth()->user()->hasRole('sale-head') || auth()->user()->hasRole('sale-manager')) {
+            return "inside sale head and manager condition";
+        }
+
+        // $image_path = "/public/images/project/";
+        // return $image_path;
+        // $project_images = $this->multi_image_upload($request->project_images, $image_path, $project->id, Project::class);
+        // return $project_images;
+
+        // $project->images()->insert($project_images);
+
+        // // return redirect('/projects')->with(['message' => 'Project Created successfully'])
+
+        // return response()->json(['message' => 'created successfully']);
 
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function show(ProjectShowRequest $request,$id)
+    public function show(ProjectShowRequest $request, $id)
     {
-        
-        $pro = auth()->user()->projects()->selectProjects()->find($id);
+///////////////////////Agency Projects///////////////////////
+
+  
+        if (auth()->user()->hasRole('agency')) {
+            $agency= auth()->user()->agency;
+            if(!$agency){
+                return response()->json(['message' => 'No Agency found.']);
+            }
+            $project = $agency->projects()->find($id);
+             if (!$project){
+                 return response()->json(['message' => 'No Projects found.']);
+             }
+                
     
-        if(!$pro){
-            return response()->json(['message'=>'Not Found']);  
         }
-        // return view('projects.show_project')->with(['project'=> $pro]);
-        return response()->json(['message'=> $pro]);  
+ ///////////////////////sale-manager , sale-header , csr Projects///////////////////////       
+        elseif(auth()->user()->hasRole('sale-manager') || auth()->user()->hasRole('sale-head') ||
+         auth()->user()->hasRole('csr')){
+
+            $employee = auth()->user()->employee;
+            if(!$employee){
+                return response()->json(['message' => 'Employee found.']);
+            }
+
+            $project = $employee->projects()->find($id);
+             if (!$project){
+                 return response()->json(['message' => 'No Projects found.']);
+             }
+ 
+  ///////////////////////   Customer     ///////////////////////                 
+        }else{
+
+            $project = Project::find($id);
+        }
+
+        return response()->json(['data' => $project]);
+      
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
         $project = Project::with(['images'])
-                    ->find($id);
-      
+            ->find($id);
+
         $users = User::get();
         // ->find(0);
         // ->first();
@@ -128,54 +189,80 @@ class ProjectController extends Controller
         // ->get();
         // ->paginate(10);
         // ->all();
-        
+
         return view('projects.edit_project')->with(['project' => $project, 'users' => $users]);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function update(ProjectUpdateRequest $request, $id)
     {
-        
+
         $project = auth()->user()->projects()->find($id);
-        if(!$project){
-            return response()->json(['message'=>'Not Found']);
+        if (!$project) {
+            return response()->json(['message' => 'Not Found']);
         }
-       
-        if($request->hasFile('images')){
+
+        if ($request->hasFile('images')) {
             $image_path = '/images/project/';
-           $project_image =  $this->multi_image_upload($request->images , $image_path, $project->id, Project::class ); 
-           $project->images()->insert($project_image); 
-         
+            $project_image = $this->multi_image_upload($request->images, $image_path, $project->id, Project::class);
+            $project->images()->insert($project_image);
+
         }
         $project->update($request->only((new Project)->getFillable()));
-     
-        
-       
+
+
         // return redirect('/projects')->with(['message' => 'Updated  successfully']);
-        return response()->json(['message'=>'updated successfully']);
+        return response()->json(['message' => 'updated successfully']);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
-    {
-        $project = auth()->user()->projects()->find($id);
-        if(!$project){
-            return response()->json(['message'=>'Not Found']);
+    {      
+  ///////////////////////Agency Projects///////////////////////
+
+        if (auth()->user()->hasRole('agency')) {
+            $agency= auth()->user()->agency;
+            if(!$agency){
+                return response()->json(['message' => 'No Agency found.']);
+            }
+            $project = $agency->projects()->find($id);
+             if (!$project){
+                 return response()->json(['message' => 'No Projects found.']);
+             }
+                
+    
         }
+ ///////////////////////sale-manager , sale-header , csr Projects///////////////////////       
+        elseif(auth()->user()->hasRole('sale-manager') || auth()->user()->hasRole('sale-head') ||
+         auth()->user()->hasRole('csr')){
+
+            $employee = auth()->user()->employee;
+            if(!$employee)
+                return response()->json(['message' => 'Employee found.']);
+            
+
+            $project = $employee->projects()->find($id);
+             if (!$project)
+                 return response()->json(['message' => 'No Projects found.']);
+             
+ 
+      ///////////////////////   Customer     ///////////////////////                 
+        }
+        return 'deleted';
         $project->delete();
-        
-        //return redirect('/projects')->with(['message' => 'Successfully Deleted']);
-        return response()->json(['message'=>'Deleted successfully']);
+       return response()->json(['message' => 'Deleted successfully']);
+      
+    
     }
 }

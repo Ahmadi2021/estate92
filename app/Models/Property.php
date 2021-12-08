@@ -4,10 +4,14 @@ namespace App\Models;
 
 use App\Casts\NameCast;
 use App\Casts\PriceCast;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Comment;
 
+/**
+ * @mixin Builder
+ */
 class Property extends Model
 {
     use HasFactory;
@@ -30,20 +34,20 @@ class Property extends Model
        'price' => PriceCast::class,
        'name' => NameCast::class,
     ];
-    
+
     public function user(){
         return $this->belongsTo(User::class);
      }
 
      public function images(){
-        return $this->morphMany(Image::class,'imageable'); 
+        return $this->morphMany(Image::class,'imageable');
      }
 
      public function commentabl(){
-        return $this->morphMany(Comment::class,'commentable'); 
+        return $this->morphMany(Comment::class,'commentable');
      }
 
-   
+
 
       public function empolyee(){
         return $this->belongsTo(Employee::class);

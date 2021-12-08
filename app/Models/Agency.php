@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin Builder
+ */
 class Agency extends Model
 {
     use HasFactory;
@@ -32,6 +36,6 @@ class Agency extends Model
 
     public function projects(){
 
-        return $this->morphMany(Project::class,'projectable');
+        return $this->morphMany(Project::class,'ownerable');
     }
 }
