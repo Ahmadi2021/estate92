@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Floors;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class FloorStoreRequest extends FormRequest
+class FloorIndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,7 +13,7 @@ class FloorStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return auth()->user()->hasPermissionTo('create-floor');
+        return auth()->user()->hasPermissionTo('view-all-floors');
     }
 
     /**
@@ -24,13 +24,9 @@ class FloorStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required','string','max:50'],
-            'description' => ['required'],
-
             
-           
-
-            
+            // 'name' =>['required', 'max:50'],
+            // 'description' =>['required'],
 
         ];
     }

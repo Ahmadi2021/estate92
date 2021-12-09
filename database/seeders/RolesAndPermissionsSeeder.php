@@ -254,6 +254,9 @@ class RolesAndPermissionsSeeder extends Seeder
             //Permissions for Floor
             'view-all-floors',
             'view-floor',
+            'create-floor',
+            'update-floor',
+            'delete-floor',
             
 
             // permissions for blogs 

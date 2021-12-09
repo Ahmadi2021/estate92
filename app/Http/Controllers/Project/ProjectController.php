@@ -161,7 +161,7 @@ class ProjectController extends Controller
                  return response()->json(['message' => 'No Projects found.']);
              }
  
-  ///////////////////////   Customer     ///////////////////////                 
+  /////////////////////// Customer ///////////////////////                 
         }else{
 
             $project = Project::find($id);
@@ -203,9 +203,34 @@ class ProjectController extends Controller
     public function update(ProjectUpdateRequest $request, $id)
     {
 
-        $project = auth()->user()->projects()->find($id);
-        if (!$project) {
-            return response()->json(['message' => 'Not Found']);
+///////////////////////Agency Projects///////////////////////
+
+        if (auth()->user()->hasRole('agency')) {
+            $agency= auth()->user()->agency;
+            if(!$agency){
+                return response()->json(['message' => 'No Agency found.']);
+            }
+            $project = $agency->projects()->find($id);
+             if (!$project){
+                 return response()->json(['message' => 'No Projects found.']);
+             }
+                
+    
+        }
+ ///////////////////////Sale-manager , Sale-head , csr Projects///////////////////////       
+        elseif(auth()->user()->hasRole('sale-manager') || auth()->user()->hasRole('sale-head') ||
+         auth()->user()->hasRole('csr')){
+
+            $employee = auth()->user()->employee;
+            if(!$employee)
+                return response()->json(['message' => 'Employee found.']);
+            
+
+            $project = $employee->projects()->find($id);
+             if (!$project)
+                 return response()->json(['message' => 'No Projects found.']);
+             
+               
         }
 
         if ($request->hasFile('images')) {
@@ -256,10 +281,9 @@ class ProjectController extends Controller
              if (!$project)
                  return response()->json(['message' => 'No Projects found.']);
              
- 
-      ///////////////////////   Customer     ///////////////////////                 
+               
         }
-        return 'deleted';
+    
         $project->delete();
        return response()->json(['message' => 'Deleted successfully']);
       
