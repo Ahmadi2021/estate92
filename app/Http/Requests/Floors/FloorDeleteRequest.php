@@ -13,7 +13,7 @@ class FloorDeleteRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return auth()->user()->hasPermissionTo('delete-floor');
     }
 
     /**

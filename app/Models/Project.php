@@ -29,7 +29,7 @@ class Project extends Model
         return $this->hasMany(Floor::class);
     }
 
-    public function commentable(){
+    public function comments(){
         $this->morphMany(Comment::class,'commentable');
     }
 

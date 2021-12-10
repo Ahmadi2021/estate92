@@ -58,12 +58,7 @@ class ProjectController extends Controller
              if (!$projects){
                  return response()->json(['message' => 'No Projects found.']);
              }
- 
-  ///////////////////////   Customer     ///////////////////////                 
-        }else{
 
-            $projects = Project::all();
-        }
 
         return response()->json(['data' => $projects]);
     }
@@ -161,12 +156,8 @@ class ProjectController extends Controller
                  return response()->json(['message' => 'No Projects found.']);
              }
  
-  /////////////////////// Customer ///////////////////////                 
-        }else{
-
-            $project = Project::find($id);
+               
         }
-
         return response()->json(['data' => $project]);
       
     }

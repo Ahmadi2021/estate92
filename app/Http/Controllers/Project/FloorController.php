@@ -3,17 +3,38 @@
 namespace App\Http\Controllers\Project;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Floors\FloorDeleteRequest;
 use App\Http\Requests\Floors\FloorIndexRequest;
+use App\Http\Requests\Floors\FloorShowRequest;
 use App\Http\Requests\FloorStoreRequest;
 use App\Http\Requests\FloorUpdateRequest;
 use App\Models\Agency;
 use App\Models\Floor;
 use App\Models\Project;
+use App\Traits\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class FloorController extends Controller
 {
+    use UserRole;
+
+    public $owner;
+    // public function __construct()
+    // {
+    //     $this->middleware(function($request, $next){
+    //         $this->owner = $this->check_roles(auth()->user()->getRoleNames()->first());
+    //         return $next($request);
+    //     });
+    // }
+
+    public function __construct()
+    {
+    
+        $this->middleware(function($request, $next){
+            $this->owner = $this->check_roles(auth()->user()->getRoleNames()->first());
+        });
+    }
     /**
      * Display a listing of the resource.
      *
@@ -21,38 +42,14 @@ class FloorController extends Controller
      */
     public function index(FloorIndexRequest $request)
     {  
-         //////////////////// Agency//////////////////
-       if(auth()->user()->hasRole('agency')){
-            $agency = auth()->user()->agency;
-            if(!$agency){
-                return  response()->json(['message'=>'Agency Not Found']);
-            }
-           $floors = $agency->projects()->with(['floors'])->get();
-           
-       }
-       ///////////// Sale-head , Sale-manager , Csr ////////////////
-
-       elseif(auth()->user()->hasRole('sale-head') || auth()->user()->hasRole('sale-manager')
-       || auth()->user()->hasRole('csr')){
-           $employee = auth()->user()->employee;
-
-           if(!$employee){
-                return  response()->json(['message'=>'Employee Not Found']);
-            }
-            $floors = $employee->projects()->with(['floors'])->get();
-            
-
-       }
-       //////////////// Customer /////////////////////////////
-       else{
-         $floors = Project::with(['floors'])->get();  
-       }
         
-        return response()
-                ->json([
-                    'data' => $floors
-                ]);
-
+        if(!$this->owner)
+            return  response()->json(['message'=>'No User found']);
+        $project = $this->owner->projects()->find($request->project_id);
+        if(!$project)
+            return  response()->json(['message' => 'No Project Found']);
+        $floor = $project->floors()->get();
+        return response()->json(['data' => $floor]);
     }
 
     /**
@@ -76,10 +73,9 @@ class FloorController extends Controller
         DB::beginTransaction();
 
         // return auth()->user()->getRoleNames();
-      //////////////////////////////////// Agency ////////////////////
+    
 
-
-        if(auth()->user()->hasRole('agency')){
+        if(){
             
          $agency = auth()->user()->agency;
             if(!$agency){
@@ -97,7 +93,7 @@ class FloorController extends Controller
 
 
         }
-        ///////////////////////// Sale-head , Sale-manager  , csr ////////////////////////
+
 
         else{
             
@@ -134,15 +130,20 @@ class FloorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(FloorShowRequest $request  , $floor_id  )
     {   
         //////////////////// Agency//////////////////
-       if(auth()->user()->('agency')){
+        // return auth()->user()->getRoleNames();
+       if(auth()->user()->hasRole('agency')){
             $agency = auth()->user()->agency;
             if(!$agency){
                 return  response()->json(['message'=>'Agency Not Found']);
             }
-           $floors = $agency->projects()->with(['floors'])->find($id);
+           $project = $agency->projects()->find($request->project_id);
+           if(!$project){
+               return  response()->json(['message'=>'Project Not Found']);
+           }
+          $floor = $project->floors()->find($floor_id);
            
        }
        ///////////// Sale-head , Sale-manager , Csr ////////////////
@@ -154,20 +155,23 @@ class FloorController extends Controller
            if(!$employee){
                 return  response()->json(['message'=>'Employee Not Found']);
             }
-            $floors = $employee->projects()->with(['floors'])->find($id);
-            
+            $project = $employee->projects()->find($request->project_id);
+            if(!$project){
+               return  response()->json(['message'=>'Project Not Found']);
+           }
+           $floor = $project->floors()->find($floor_id);
 
        }
-       //////////////// Customer /////////////////////////////
-       else{
-         $floors = Project::with(['floors'])->find($id);  
+    
+          $floor = $project->floors()->find($floor_id);
+        
        }
         
-        return response()
-                ->json([
-                    'data' => $floors
-                ]);
-    }
+    //     return response()
+    //             ->json([
+    //                 'data' => $floor
+    //             ]);
+    // }
 
     /**
      * Show the form for editing the specified resource.
@@ -187,21 +191,48 @@ class FloorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(FloorUpdateRequest $request, $id)
+    public function update(FloorUpdateRequest $request, $floor_id)
     {   
         DB::beginTransaction();
-        $project = auth()->user()->projects()->find($request->project_id);
-        
-        $floor = $project->floors()->find($id);
-        if(!$floor){
-            DB::rollBack();
-            return response()->json(['message' => 'Not found']);
 
-        }else{
-            DB::commit();
-            $floor ->update($request->all());
-            return response()->json(['message' => 'Updated successfully']); 
-        }
+        //////////////////// Agency//////////////////
+        // return auth()->user()->getRoleNames();
+       if(auth()->user()->hasRole('agency')){
+            $agency = auth()->user()->agency;
+            if(!$agency){
+                DB::rollBack();
+                return  response()->json(['message'=>'Agency Not Found']);
+            }
+           $project = $agency->projects()->find($request->project_id);
+           if(!$project){
+               DB::rollBack();
+               return  response()->json(['message'=>'Project Not Found']);
+           }
+          $floor = $project->floors()->find($floor_id);
+           
+       }
+       ///////////// Sale-head , Sale-manager , Csr ////////////////
+
+       elseif(auth()->user()->hasRole('sale-head') || auth()->user()->hasRole('sale-manager')
+       || auth()->user()->hasRole('csr')){
+           $employee = auth()->user()->employee;
+
+           if(!$employee){
+               DB::rollBack();
+                return  response()->json(['message'=>'Employee Not Found']);
+            }
+            $project = $employee->projects()->find($request->project_id);
+            if(!$project){
+                DB::rollBack();
+               return  response()->json(['message'=>'Project Not Found']);
+           }
+           $floor = $project->floors()->find($floor_id);
+
+       }
+
+       $floor->update($request->only((new Floor)->getFillable()));
+       DB::commit();
+       return  response()->json(['message'=>'Updated Successfuly']);
        
           
     }
@@ -212,15 +243,42 @@ class FloorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $id)
+    public function destroy(FloorDeleteRequest $request, $floor_id)
     {
-        return $id;
-        $project = auth()->user()->projects()->find($request->project_id);
-        $floor = $project->floors()->find($id);
-        if(!$floor){
-            return response()->json(['message' => 'Not found']);
-        }
-        $floor ->delete();
+        
+    //////////////////// Agency//////////////////
+        // return auth()->user()->getRoleNames();
+       if(auth()->user()->hasRole('agency')){
+            $agency = auth()->user()->agency;
+            if(!$agency){
+                return  response()->json(['message'=>'Agency Not Found']);
+            }
+           $project = $agency->projects()->find($request->project_id);
+           if(!$project){
+               return  response()->json(['message'=>'Project Not Found']);
+           }
+          $floor = $project->floors()->find($floor_id);
+           
+       }
+       ///////////// Sale-head , Sale-manager , Csr ////////////////
+
+       elseif(auth()->user()->hasRole('sale-head') || auth()->user()->hasRole('sale-manager')
+       || auth()->user()->hasRole('csr')){
+           $employee = auth()->user()->employee;
+
+           if(!$employee){
+                return  response()->json(['message'=>'Employee Not Found']);
+            }
+            $project = $employee->projects()->find($request->project_id);
+            if(!$project){
+               return  response()->json(['message'=>'Project Not Found']);
+           }
+           $floor = $project->floors()->find($floor_id);
+
+       }
+        
+       
+        $floor->delete();
             return response()->json(['message' => 'Deleted successfully']);
     }
 }

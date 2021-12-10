@@ -13,7 +13,7 @@ class FloorShowRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return auth()->user()->hasPermissionTo('view-floor');
     }
 
     /**
