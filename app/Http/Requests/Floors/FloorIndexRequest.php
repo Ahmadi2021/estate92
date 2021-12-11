@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Floors;
 
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class FloorIndexRequest extends FormRequest
 {
@@ -25,7 +27,7 @@ class FloorIndexRequest extends FormRequest
     {
         return [
             
-            // 'name' =>['required', 'max:50'],
+            'project_id' =>['required', 'numeric', Rule::exists(Project::class, 'id')],
             // 'description' =>['required'],
 
         ];

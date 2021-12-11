@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Project;
+use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class FloorStoreRequest extends FormRequest
@@ -24,6 +26,7 @@ class FloorStoreRequest extends FormRequest
     public function rules()
     {
         return [
+            // 'project_id' =>['required', 'numeric', Rule::exists(Project::class, 'id')],
             'name' => ['required','string','max:50'],
             'description' => ['required'],
 

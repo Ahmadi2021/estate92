@@ -4,13 +4,14 @@ use App\Http\Controllers\auth\LoginController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\Comment\CommentController;
 use App\Http\Controllers\Empolyee\EmpolyeeController;
-use App\Http\Controllers\Project\FloorController;
-use App\Http\Controllers\Project\ProjectController;
-use App\Http\Controllers\Project\UnitController;
+use App\Http\Controllers\Projects\FloorController;
+use App\Http\Controllers\Projects\ProjectController;
+use App\Http\Controllers\Projects\UnitController;
 use App\Http\Controllers\property\PropertyController;
 use App\Http\Controllers\UserController;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\Request as FacadesRequest;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -54,8 +55,5 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::apiResource('/employees', EmpolyeeController::class);
 });
 
-
-
-
-
+ 
 

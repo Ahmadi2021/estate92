@@ -235,9 +235,12 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         $this->csr->givePermissionTo([
-            // permissions for projects 
+              // permissions for projects 
             'view-all-projects',
             'view-project',
+            'create-project',
+            'update-project',
+            'delete-project',
            
 
             // permissions for properties

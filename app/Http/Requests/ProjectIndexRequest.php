@@ -16,15 +16,11 @@ class ProjectIndexRequest extends FormRequest
         return auth()->user()->hasPermissionTo('view-all-projects');
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
+    
     public function rules()
     {
         return [
-            //
+            
         ];
     }
 }
