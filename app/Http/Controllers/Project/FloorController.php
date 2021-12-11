@@ -32,7 +32,7 @@ class FloorController extends Controller
     {
     
         $this->middleware(function($request, $next){
-            $this->owner = $this->check_roles(auth()->user()->getRoleNames()->first());
+            $this->owner = $this->check_role(auth()->user()->getRoleNames()->first());
         });
     }
     /**
@@ -71,56 +71,24 @@ class FloorController extends Controller
     public function store(FloorStoreRequest $request)
     {
         DB::beginTransaction();
-
-        // return auth()->user()->getRoleNames();
-    
-
-        if(){
-            
-         $agency = auth()->user()->agency;
-            if(!$agency){
-                DB::rollBack();
-                return  response()->json(['message'=>'Agency Not Found']);
-            }
-
-         $project = $agency->projects()->find($request->project_id);
-             if(!$project){
-                 DB::rollBack();
-             return response()->json(['message' => 'No project found with the provided id.']);
-            } 
-            
-            
-
-
+        if(!$this->owner){
+            return response()->json(['message'=>' User Not Found']);
         }
-
-
-        else{
             
-          
-            $employee = auth()->user()->employee;
-            
-            if(!$employee){
-                return  response()->json(['message'=>'Employee Not Found']);
-            }
-
-            // return auth()->user()->employee;
-            $project =  $employee->projects()->find($request->project_id);
-            if(!$project){
-                 DB::rollBack();
+         $project = $this->owner->projects()->find($request->project_id);
+             if(!$project){
                 return response()->json(['message' => 'No project found with the provided id.']);
             } 
-            
-            
-        }
       
-        $project->floors()->create($request->only((new Floor)->getFillable()));
-        DB::commit();
-        return response()->json(['message' => 'Created Successfully']);
-        
-        
-        
-        
+        $project_floor = $project->floors()->create($request->only((new Floor)->getFillable()));
+        if(!$project_floor){
+            DB::commit();
+            return response()->json(['message' => 'Created Successfully']);
+        }
+        else {
+            DB::rollBack();
+            return response()->json(['message' => 'Created Successfully']);
+        }
            
     }
 

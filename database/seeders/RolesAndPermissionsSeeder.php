@@ -104,7 +104,6 @@ class RolesAndPermissionsSeeder extends Seeder
 
 
 
-
     }
     
     public function assign_permissions()
