@@ -16,7 +16,7 @@ class ProjectsTable extends Migration
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
             $table->string('name', 255);
-            $table->text('slug')->unique();
+            $table->text('slug');
             $table->text('description');
             $table->integer('code');
             $table->boolean('is_active')->default(false);

@@ -107,37 +107,19 @@ class ProjectController extends Controller
      */
     public function show(ProjectShowRequest $request, $id)
     {
-///////////////////////Agency Projects///////////////////////
 
-  
-        if (auth()->user()->hasRole('agency')) {
-            $agency= auth()->user()->agency;
-            if(!$agency){
-                return response()->json(['message' => 'No Agency found.']);
-            }
-            $project = $agency->projects()->find($id);
+          if (!$this->owner) {
+
+            return response()->json(['message'=>"User Not Found"]);
+        }
+            $project = $this->owner->projects()->find($id);
              if (!$project){
                  return response()->json(['message' => 'No Projects found.']);
              }
                 
     
-        }
- ///////////////////////sale-manager , sale-header , csr Projects///////////////////////       
-        elseif(auth()->user()->hasRole('sale-manager') || auth()->user()->hasRole('sale-head') ||
-         auth()->user()->hasRole('csr')){
+        
 
-            $employee = auth()->user()->employee;
-            if(!$employee){
-                return response()->json(['message' => 'Employee found.']);
-            }
-
-            $project = $employee->projects()->find($id);
-             if (!$project){
-                 return response()->json(['message' => 'No Projects found.']);
-             }
- 
-               
-        }
         return response()->json(['data' => $project]);
       
     }
