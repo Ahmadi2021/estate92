@@ -20,10 +20,10 @@ class FloorController extends Controller
     use UserRole;
 
     public $owner;
-  
+
     public function __construct()
     {
-    
+
         $this->middleware(function($request, $next){
             $this->owner = $this->check_role(auth()->user()->getRoleNames()->first());
             return $next($request);
@@ -35,8 +35,8 @@ class FloorController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(FloorIndexRequest $request)
-    {  
-        
+    {
+
         if(!$this->owner)
             return  response()->json(['message'=>'No User found']);
         $project = $this->owner->projects()->find($request->project_id);
@@ -60,20 +60,20 @@ class FloorController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(FloorStoreRequest $request)
-    {   
-       
+    {
+
         DB::beginTransaction();
         if(!$this->owner){
-            
+
             return response()->json(['message'=>' User Not Found']);
         }
 
-            
+
          $project = $this->owner->projects()->find($request->project_id);
              if(!$project){
                 return response()->json(['message' => 'No project found with the provided id.']);
-            } 
-      
+            }
+
         $project_floor = $project->floors()->create($request->only((new Floor)->getFillable()));
         if($project_floor){
             DB::commit();
@@ -83,7 +83,7 @@ class FloorController extends Controller
             DB::rollBack();
             return response()->json(['message' => 'Error Occure']);
         }
-           
+
     }
 
     /**
@@ -93,11 +93,10 @@ class FloorController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(FloorShowRequest $request  , $floor_id  )
-    {   
+    {
        if(!$this->owner){
            return  response()->json(['message'=>'User Not Found']);
        }
-         
         $project = $this->owner->projects()->find($request->project_id);
         if(!$project)
         {
@@ -136,28 +135,27 @@ class FloorController extends Controller
         if(!$this->owner){
             return response()->json(['message' => 'User Not Found']);
         }
-            
       $project = $this->owner->projects()->find($request->project_id);
            if(!$project){
                return  response()->json(['message'=>'Project Not Found']);
            }
       $floor = $project->floors()->find($floor_id);
-           
-       
+
+
        $floor->update($request->only((new Floor)->getFillable()));
        if($floor){
         DB::commit();
        return  response()->json(['message'=>'Updated Successfuly']);
        }
-       
+
        else{
 
          DB::rollBack();
          return  response()->json(['message'=>'Updated Successfuly']);
        }
-       
-       
-          
+
+
+
     }
 
     /**
@@ -168,8 +166,8 @@ class FloorController extends Controller
      */
     public function destroy(FloorDeleteRequest $request, $floor_id)
     {
-        
- 
+
+
        if(!$this->owner){
             return response()->json(['message'=> 'Not Found']);
        }

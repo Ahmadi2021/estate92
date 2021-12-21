@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Units;
 
-use App\Models\Project;
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class FloorStoreRequest extends FormRequest
+class UnitIndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -15,7 +14,7 @@ class FloorStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return auth()->user()->hasPermissionTo('create-floor');
+        return auth()->user()->hasPermissionTo('view-all-units');
     }
 
     /**
@@ -26,15 +25,8 @@ class FloorStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'project_id' =>['required', 'numeric', Rule::exists('projects', 'id')],
-            'name' => ['required','string','max:50'],
-            'description' => ['required'],
-
-
-
-
-
-
+           'project_id' => ['required', 'numeric',Rule::exists('projects' , 'id')],
+            'floor_id' => ['required', 'numeric',Rule::exists('floors' , 'id')],
         ];
     }
 }

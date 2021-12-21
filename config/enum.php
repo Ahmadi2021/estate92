@@ -31,4 +31,9 @@ return [
 //        'customer',
 //        'agency'
 //    ]
+    'unit_type' =>[
+        'shop',
+        'office',
+        'room',
+    ],
 ];

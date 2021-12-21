@@ -49,7 +49,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'delete-property']);
 
         //Uint
-        Permission::firstOrCreate(['name' => 'view-all-uints']);
+        Permission::firstOrCreate(['name' => 'view-all-units']);
         Permission::firstOrCreate(['name' => 'view-unit']);
         Permission::firstOrCreate(['name'=> 'create-unit']);
         Permission::firstOrCreate(['name'=>'update-unit']);
@@ -123,7 +123,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-property',
 
             //Permissions for Unit
-             'view-all-uints',
+             'view-all-units',
             'view-unit',
             'create-unit',
             'update-unit',
@@ -167,8 +167,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'delete-property',
 
 
-              //Permissions for Unit
-             'view-all-uints',
+            //Permissions for Unit
+             'view-all-units',
             'view-unit',
             'create-unit',
             'update-unit',
@@ -209,7 +209,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
 
               //Permissions for Unit
-             'view-all-uints',
+             'view-all-units',
             'view-unit',
             'create-unit',
             'update-unit',
@@ -248,9 +248,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-property',
 
 
-            //Permissions for Unit
-            'view-all-uints',
+             //Permissions for Unit
+             'view-all-units',
             'view-unit',
+            'create-unit',
+            'update-unit',
+            'delete-unit',
            
 
             //Permissions for Floor
@@ -289,7 +292,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
 
               //Permissions for Unit
-             'view-all-uints',
+             'view-all-units',
             'view-unit',
            
 

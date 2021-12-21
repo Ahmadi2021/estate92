@@ -15,12 +15,13 @@ class CreateUnitsTable extends Migration
     {
         Schema::create('units', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('description');
+            $table->string('name', 10);
+            $table->text('description', 100);
             $table->double('price');
             $table->integer('size');
             $table->boolean('status')->default(false);
             $table->integer('unit_number');
+            $table->enum('type',config('enum.unit_type'));
             $table->foreignId('floor_id')->constrained('floors');
             $table->timestamps();
         });

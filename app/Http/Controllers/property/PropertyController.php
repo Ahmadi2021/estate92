@@ -10,16 +10,24 @@ use App\Http\Requests\PropertyStoreRequest;
 use App\Http\Requests\PropertyUpdateRequest;
 use App\Models\Property;
 use App\Models\User;
+use App\Traits\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PropertyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    use UserRole;
+    public $owner;
+    public function __construct()
+    {
+        $this->middleware(function($next , $request){
+            $this->owner = $this->check_role(auth()->user()->getRoleNames()->first());
+            return $next($request);
+        });
+    }
+
+
+
     public function index(PropertyIndexRequest $request)
     {
         $property =auth()->user()->properties()->get();

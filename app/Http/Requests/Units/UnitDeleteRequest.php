@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Units;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class UnitUpdateRequest extends FormRequest
+class UnitDeleteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,7 +14,7 @@ class UnitUpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return auth()->user()->hasPermissionTo('delete-unit');
     }
 
     /**
@@ -24,11 +25,8 @@ class UnitUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' =>['required','string','max:50'],
-            'description' =>['required'],
-            'price' =>['required'],
-            'size' =>['required'],
-            'unit_number' =>['required'],
+            'project_id' => ['required', 'numeric',Rule::exists('projects' , 'id')],
+            'floor_id' => ['required', 'numeric',Rule::exists('floors' , 'id')],
         ];
     }
 }

@@ -3,23 +3,53 @@
 namespace App\Http\Controllers\Projects;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UnitStoreRequest;
+use App\Http\Requests\Floors\FloorIndexRequest;
+use App\Http\Requests\Units\UnitDeleteRequest;
+use App\Http\Requests\Units\UnitIndexRequest;
+use App\Http\Requests\Units\UnitShowRequest;
+use App\Http\Requests\Units\UnitStoreRequest;
+use App\Http\Requests\Units\UnitUpdateRequest;
+
 use App\Models\Unit;
 use App\Models\User;
+use App\Traits\UserRole;
+use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class UnitController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    use UserRole;
+    public $owner;
+    
+    public function __construct()
     {
-        $unit =auth()->user()->projects()->with(['floors.units'])->get();
-        return response()->json(['message', $unit]);
+        $this->middleware(function( $request, $next){
+            $this->owner = $this->check_role(auth()->user()->getRoleNames()->first());
+            return  $next($request);
+      
+        });
+        
+    }
+    public function index(UnitIndexRequest $request)
+    {
+        // return auth()->user()->getRoleNames()->first();
+       if(!$this->owner){
+            return response()->json(['message'=> 'User Not Found']);
+       } 
+       $project = $this->owner->projects->find($request->project_id);
+        if(!$project){
+
+            return response()->json(['message'=> 'Project Not Found']);
+       } 
+       $floor = $project->floors()->with('units')->find($request->floor_id);
+       
+       if(!$floor){
+            return response()->json(['message'=> 'Floor Not Found']);
+       } 
+
+    
+        return response()->json(['data'=> $floor]);
     }
 
     /**
@@ -38,9 +68,15 @@ class UnitController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(UnitStoreRequest $request)
+    public function store(UnitStoreRequest  $request)
     {    
-        $project = auth()->user()->projects->find($request->project_id);
+         
+        if(!$this->owner){
+
+            return response()->json(['message'=> 'User Not Found']);
+       } 
+        $project = $this->owner->projects->find($request->project_id);
+        
         if(!$project){
              return response()->json(['message'=> 'Project Not Found']);
         }
@@ -51,8 +87,8 @@ class UnitController extends Controller
 
          $unit = $floor->units()->create($request->only((new Unit())->getFillable()));
          
-          if(!$unit){
-             return response()->json(['message'=> 'floor Not Found']);
+        if(!$unit){
+             return response()->json(['message'=> 'Unit Not Found']);
             }
 
          
@@ -67,24 +103,24 @@ class UnitController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, $id)
+    public function show(UnitShowRequest $request, $id)
     {
-        $project = auth()->user()->projects()->find($request->project_id);
+        if(!$this->owner){
+            return response()->json(['message'=> 'User Not Found']);
+       } 
+       $project = $this->owner->projects->find($request->project_id);
         if(!$project){
-            return response()->json(['message'=> 'Project Not Found']);
-        }
-        //implement check here for project.
-        $floors = $project->floors()->find($request->floor_id);
 
-         if(!$floors){
+            return response()->json(['message'=> 'Project Not Found']);
+       } 
+       $unit = $project->floors()->with(['units'=> function($query) use($id){
+            $query->find($id);
+       }])->find($request->floor_id);
+       if(!$unit){
             return response()->json(['message'=> 'Floor Not Found']);
-        }
-        $unit = $floors->units()->find($id);
-    
-        if(!$unit){
-            return response()->json(['message'=> ' Unit Not found']);
-        }
-         return response()->json(['message'=> $unit]);
+       } 
+       
+        return response()->json(['data'=> $unit]);
     }
 
     /**
@@ -105,22 +141,23 @@ class UnitController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UnitUpdateRequest $request, $id)
     {
-        $project = auth()->user()->projects()->find($request->project_id);
+        if(!$this->owner){
+            return response()->json(['message'=> 'User Not Found']);
+       } 
+       $project = $this->owner->projects->find($request->project_id);
         if(!$project){
-            return response()->json(['message'=> 'Project Not Found']);
-        }
-        //implement check here for project.
-        $floor = $project->floors()->find($request->floor_id);
 
-         if(!$floor){
+            return response()->json(['message'=> 'Project Not Found']);
+       } 
+       $floor = $project->floors()->find($request->floor_id);
+       if(!$floor){
             return response()->json(['message'=> 'Floor Not Found']);
-        }
-          $unit = $floor->units()->find($id);
-          if(!$unit){
-              return response()->json(['message'=> 'Unit Not Found']);
-          }
+       } 
+
+       $unit = $floor->units()->find($unit_id);
+        return response()->json(['data'=> $unit]);
           $unit->update($request->only((new User())->getFillable()));
           
           return response()->json(['message'=> 'Successfuly Added']);
@@ -132,24 +169,24 @@ class UnitController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request,$id)
+    public function destroy(UnitDeleteRequest $request,$unit_id)
     {   
-        $project= auth()->user()->projects()->find($request->project_id);
+        if(!$this->owner){
+            return response()->json(['message'=> 'User Not Found']);
+       } 
+       $project = $this->owner->projects->find($request->project_id);
         if(!$project){
-            return response()->json(['message'=> 'Project Not Found']);
-        }
-        $floors = $project->floors()->find($request->floor_id);
-        if(!$floors){
-            return response()->json(['message'=>'Floor Not Found']);
-        }
-        $units = $floors->units()->find($id);
-    
-        if(!$units){
-          return response()->json(['message'=> 'Unit Not found']);
-      }
-      $units->delete();
-      return response()->json(['message'=> 'Deleted successfully']);
 
+            return response()->json(['message'=> 'Project Not Found']);
+       } 
+       $floor = $project->floors()->find($request->floor_id);
+       if(!$floor){
+            return response()->json(['message'=> 'Floor Not Found']);
+       } 
+
+       $unit = $floor->units()->find($unit_id);
+       $unit->delete();
+       return response()->json(['message'=> 'Deleted Successfully']);
         
     }
 }

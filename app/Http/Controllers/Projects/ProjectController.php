@@ -27,14 +27,13 @@ use Illuminate\Support\Str;
 class ProjectController extends Controller
 {
     use ImageUpload, UserRole;
-
     public $owner;
 
-    public function __construct(){
-
-        $this->middleware(function( $request, $next){
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
             $this->owner = $this->check_role(auth()->user()->getRoleNames()->first());
-            return  $next($request);
+            return $next($request);
         });
     }
 
@@ -45,32 +44,26 @@ class ProjectController extends Controller
      */
     public function index(ProjectIndexRequest $request, ProjectService $project_service)
     {
-
         if (!$this->owner) {
-
-            return response()->json(['message'=>"User Not Found"]);
+            return response()->json(['message' => "User Not Found"]);
         }
 
         $projects = $this->owner->projects()->get();
-
-        if (!$projects){
-            
+        if (!$projects)
             return response()->json(['message' => 'No Projects found.']);
-        }
 
         return response()->json(['data' => $projects]);
-    
     }
+
     /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
-   public function create()
+    public function create()
     {
         $users = User::select('id', 'name')->get();
         $project_id = Project::latest()->first()->id;
-
 
         return view('projects.create_project')->with(['users' => $users, 'project_id' => $project_id + 1]);
     }
@@ -78,25 +71,22 @@ class ProjectController extends Controller
 
     public function store(ProjectStoreRequest $request)
     {
-        // ini_set('max_execution_time', 4);
-
+        return  Agency::class;
         if (!$this->owner) {
-
-            return response()->json(['message'=>"User Not Found"]);
+            return response()->json(['message' => "User Not Found"]);
         }
-        
-        // if(auth()->user()->hasRole('agency')){
-        //     $request->merge(['ownerable_type' => Agency::class]);
-        // }
-        // else if(auth()->user()->hasRole('sale-manager') || auth()->user()->hasRole('sale-head') || auth()->user()->hasRole('csr')){
-        //     $request->merge(['ownerable_type' => Employee::class]);
-        // }
-        
-        // $request->merge(['ownerable_id' => $this->owner->id]);
-    // return Project::create($request->all());
-    //     return Project::create($request->only(['name', 'description', 'code', 'is_active', 'address']));
-           Log::debug($this->owner->projects()->create($request->only((new Project)->getFillable())));
-            return response()->json(['message' => 'Created Successfully']);
+         if(auth()->user()->hasRole('agency')){
+             $request->merge(['ownerable_type' => Agency::class]);
+         }
+         else if(auth()->user()->hasRole('sale-manager') || auth()->user()->hasRole('sale-head') || auth()->user()->hasRole('csr')){
+             $request->merge(['ownerable_type' => Employee::class]);
+         }
+
+         $request->merge(['ownerable_id' => $this->owner->id]);
+         return Project::create($request->all());
+             return Project::create($request->only(['name', 'description', 'code', 'is_active', 'address']));
+        Log::debug($this->owner->projects()->create($request->only((new Project)->getFillable())));
+        return response()->json(['message' => 'Created Successfully']);
     }
 
     /**
@@ -107,21 +97,33 @@ class ProjectController extends Controller
      */
     public function show(ProjectShowRequest $request, $id)
     {
+//        if (!$this->owner) {
+//            return response()->json(['message' => "User Not Found"]);
+//        }
+//        $project = $this->owner->projects()->find($id);
+//        if (!$project) {
+//            return response()->json(['message' => 'No Projects found.']);
+//        }
+//        return response()->json(['data' => $project]);
+         if(!$this->owner)
+             return response()->json(['message'=> 'User Not Found']);
+        $project = $this->owner->projects()
+            ->with(['floors'=> function($query){
+                $query->with(['units'=>function($q){
+                    $q->select(['id','name','price','floor_id']);
 
-          if (!$this->owner) {
+                }])->select(['id','name','project_id'])
+                    ->withCount('units');
 
-            return response()->json(['message'=>"User Not Found"]);
-        }
-            $project = $this->owner->projects()->find($id);
-             if (!$project){
-                 return response()->json(['message' => 'No Projects found.']);
-             }
-                
-    
-        
+             }])->select(['id','name','ownerable_id','ownerable_type'])
+            ->withMax('units','price')
+            ->withCount('units')
+            ->withMin('units','price')
+            ->get();
+        return response()->json(['message' => $project]);
 
-        return response()->json(['data' => $project]);
-      
+
+
     }
 
     /**
@@ -134,15 +136,7 @@ class ProjectController extends Controller
     {
         $project = Project::with(['images'])
             ->find($id);
-
         $users = User::get();
-        // ->find(0);
-        // ->first();
-
-        // ->get();
-        // ->paginate(10);
-        // ->all();
-
         return view('projects.edit_project')->with(['project' => $project, 'users' => $users]);
     }
 
@@ -155,35 +149,13 @@ class ProjectController extends Controller
      */
     public function update(ProjectUpdateRequest $request, $id)
     {
+        // return auth()->user()->getRoleNames();
+        if (!$this->owner)
+            return response()->json(['message' => 'User Not Found']);
 
-///////////////////////Agency Projects///////////////////////
-
-        if (auth()->user()->hasRole('agency')) {
-            $agency= auth()->user()->agency;
-            if(!$agency){
-                return response()->json(['message' => 'No Agency found.']);
-            }
-            $project = $agency->projects()->find($id);
-             if (!$project){
-                 return response()->json(['message' => 'No Projects found.']);
-             }
-                
-    
-        }
- ///////////////////////Sale-manager , Sale-head , csr Projects///////////////////////       
-        elseif(auth()->user()->hasRole('sale-manager') || auth()->user()->hasRole('sale-head') ||
-         auth()->user()->hasRole('csr')){
-
-            $employee = auth()->user()->employee;
-            if(!$employee)
-                return response()->json(['message' => 'Employee found.']);
-            
-
-            $project = $employee->projects()->find($id);
-             if (!$project)
-                 return response()->json(['message' => 'No Projects found.']);
-             
-               
+        $project = $this->owner->projects()->find($id);
+        if (!$project) {
+            return response()->json(['message' => ' Projects Not found.']);
         }
 
         if ($request->hasFile('images')) {
@@ -193,9 +165,6 @@ class ProjectController extends Controller
 
         }
         $project->update($request->only((new Project)->getFillable()));
-
-
-        // return redirect('/projects')->with(['message' => 'Updated  successfully']);
         return response()->json(['message' => 'updated successfully']);
     }
 
@@ -206,40 +175,14 @@ class ProjectController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
-    {      
-  ///////////////////////Agency Projects///////////////////////
-
-        if (auth()->user()->hasRole('agency')) {
-            $agency= auth()->user()->agency;
-            if(!$agency){
-                return response()->json(['message' => 'No Agency found.']);
-            }
-            $project = $agency->projects()->find($id);
-             if (!$project){
-                 return response()->json(['message' => 'No Projects found.']);
-             }
-                
-    
+    {
+        if (!$this->owner)
+            return response()->json(['message' => "User Not Found"]);
+        $project = $this->owner->projects()->find($id);
+        if (!$project) {
+            return response()->json(['message' => 'No Projects found.']);
         }
- ///////////////////////sale-manager , sale-header , csr Projects///////////////////////       
-        elseif(auth()->user()->hasRole('sale-manager') || auth()->user()->hasRole('sale-head') ||
-         auth()->user()->hasRole('csr')){
-
-            $employee = auth()->user()->employee;
-            if(!$employee)
-                return response()->json(['message' => 'Employee found.']);
-            
-
-            $project = $employee->projects()->find($id);
-             if (!$project)
-                 return response()->json(['message' => 'No Projects found.']);
-             
-               
-        }
-    
         $project->delete();
-       return response()->json(['message' => 'Deleted successfully']);
-      
-    
+        return response()->json(['message' => 'Deleted successfully']);
     }
 }
