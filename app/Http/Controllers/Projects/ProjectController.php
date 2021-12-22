@@ -110,7 +110,9 @@ class ProjectController extends Controller
         $project = $this->owner->projects()
             ->with(['floors'=> function($query){
                 $query->with(['units'=>function($q){
-                    $q->select(['id','name','price','floor_id']);
+                    $q->where('type' , 'shop')
+                        ->where('price', '>' , 500)
+                        ->select(['id','name','price','floor_id','type']);
 
                 }])->select(['id','name','project_id'])
                     ->withCount('units');

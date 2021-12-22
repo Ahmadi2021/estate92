@@ -26,7 +26,7 @@ class CreatePropertiesTable extends Migration
             $table->integer('no_of_bathroom');
             $table->text('description');
             $table->boolean('is_active')->default(false);
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('employee_id')->constrained('employees');
             $table->timestamps();
         });
     }

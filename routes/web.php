@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
+Route::get('/users/{user}', function (\App\Models\User   $user) {
+    return  $user->email;
     return view('welcome');
 });
 
