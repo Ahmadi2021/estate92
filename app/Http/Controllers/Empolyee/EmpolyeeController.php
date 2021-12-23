@@ -42,9 +42,9 @@ class EmpolyeeController extends Controller
             return response()->json(['data' => $employees]);
 
         }elseif(auth()->user()->hasRole('sale-head') || auth()->user()->hasRole('sale-manager') ){
-         
+
             $employees = auth()->user()->employee;
-            
+
             if(!$employees)
                 return response()->json(['message' => 'No employees found.']);
 
@@ -53,7 +53,7 @@ class EmpolyeeController extends Controller
             if(!$childs){
                  return response()->json(['message' => 'Not  found.']);
             }
-               
+
 
             return response()->json(['data' => $childs]);
         }
@@ -76,37 +76,32 @@ class EmpolyeeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(EmpolyeeStoreRequest $request)
-    { 
+    {
         DB::beginTransaction();
         $request->merge([
                 'password' => Hash::make($request->password),
             ]);
-            
         $user = User::create($request->only((new User)->getFillable()));
 
      ////////////////////////////////Agency Create Sale Head /////////////////////////
-
         if(auth()->user()->hasRole('agency')){
             $agency = auth()->user()->agency;
             if(!$agency)
                 return response()->json(['message' => 'Agency Not Found']);
-            
             $user->syncRoles('sale-head');
             $request->merge([
                 'agency_id' =>$agency->id,
                 'level' => 1,
             ]);
-           
-            
-    
-///////////////////////////////////// Sale Head  Create Sale Manager/////////////////////////////////////////       
-        
+
+///////////////////////////////////// Sale Head  Create Sale Manager/////////////////////////////////////////
+
         }
         elseif(auth()->user()->hasRole('sale-head')){
         // Here we create Sale Manager
             $employee = auth()->user()->employee;
             // return $employee_agen->agency_id;
-     
+
             $user->syncRoles('sale-manager');
             $request->merge([
                 'parent_id' => $employee->id,
@@ -119,21 +114,17 @@ class EmpolyeeController extends Controller
 
         elseif(auth()->user()->hasRole('sale-manager')){
             $emp = auth()->user()->employee;
-             
             $user->syncRoles('csr');
-          
             $request->merge([
                 'parent_id' => $emp->id,
                 'agency_id' => $emp->agency_id,
                 'level' => 3,
             ]);
-           
         }
         $user->employee()->create($request->only((new Employee)->getFillable()));
         DB::commit();
         return response()->json(['message' => 'Created successfully']);
     }
-
     /**
      * Display the specified resource.
      *
@@ -172,7 +163,7 @@ public function show( EmpolyeeShowRequest $request , $id)
                }
             return response()->json(['message' => $child]);
         }
-      
+
     }
 
     /**
@@ -197,14 +188,14 @@ public function show( EmpolyeeShowRequest $request , $id)
 
 
 
-    /////////////////////   Update Function 
+    /////////////////////   Update Function
     public function update(EmpolyeeUpdateRequest $request, $id)
-    {   
+    {
         if(auth()->user()->hasRole('agency')){
             $agency = auth()->user()->agency;
             if(!$agency){
                 return response()->json(['data' => 'Agency Not Found']);
-                
+
             }
             $employee = $agency->employees()->find($id);
             if(!$employee){
@@ -226,7 +217,7 @@ public function show( EmpolyeeShowRequest $request , $id)
             $emp_child->update($request->only((new Employee)->getFillable()));
             return response()->json(['message' => '  Not Found']);
         }
-        
+
     }
 
     /**
@@ -239,13 +230,13 @@ public function show( EmpolyeeShowRequest $request , $id)
 
 
 
-/////////////////////   Delete Function 
+/////////////////////   Delete Function
     public function destroy(EmpolyeeDeleteRequest $request, $id)
-    {   
-    
+    {
+
         if(auth()->user()->hasRole('agency')){
              $agency = auth()->user()->agency;
-             
+
            if(!$agency){
                 return response()->json(['message' => 'Agency Not Found']);
            }
@@ -253,7 +244,7 @@ public function show( EmpolyeeShowRequest $request , $id)
             $employee = $agency->employees()->find($id);
             if(!$employee){
                 return response()->json(['message' => 'Employee Not Found']);
-            
+
             }
 
             $employee->delete();
@@ -269,11 +260,11 @@ public function show( EmpolyeeShowRequest $request , $id)
                if(!$child){
                    return response()->json(['message' => 'Child Not Found']);
                }
-             
+
             $employee->delete();
             return response()->json(['message' => 'Deleted Successfully']);
-        } 
-        
+        }
+
     }
  }
 

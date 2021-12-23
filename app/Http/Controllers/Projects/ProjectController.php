@@ -72,9 +72,9 @@ class ProjectController extends Controller
     public function store(ProjectStoreRequest $request)
     {
         return  Agency::class;
-        if (!$this->owner) {
+        if(!$this->owner)
             return response()->json(['message' => "User Not Found"]);
-        }
+
          if(auth()->user()->hasRole('agency')){
              $request->merge(['ownerable_type' => Agency::class]);
          }

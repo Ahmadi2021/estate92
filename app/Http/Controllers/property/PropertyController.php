@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Traits\ImageUpload;
 use App\Traits\UserRole;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class PropertyController extends Controller
@@ -29,7 +30,7 @@ class PropertyController extends Controller
 
 
     public function index(PropertyIndexRequest $request)
-    {     if (!$this->owner)
+    {    if (!$this->owner)
                 return  response()->json(['message'=> 'User Not Found']);
         $property =$this->owner->properties()->get();
         if(!$property){
@@ -63,22 +64,8 @@ class PropertyController extends Controller
          $property = $this->owner->properties()->create($request->only((new Property)->getFillable()));
          if(!$property)
             return response()->json(['message' => 'No property found.']);
-         $prperty_images= [];
          $image_path = '/images/property';
-        $property_images= $this->multi_image_upload($request->images , $image_path , $property->id,Property::class);
-//         foreach($request->images as $image){
-//             $extension = $image->getClientOriginalExtension();
-//             $file_name = strtolower(Str::random(10));
-//             $file = $file_name . '.' . $extension;
-//             $image->move(public_path($image_path),$file);
-//
-//             $property_images [] = [
-//
-//            'image'=> $image_path .'.'. $file,
-//            'imageable_type'=> Property::class,
-//            'imageable_id' => $property->id,
-//         ];
-//        }
+         $property_images= $this->multi_image_upload($request->images , $image_path , $property->id,Property::class);
          $property->images()->insert($property_images);
          return response()->json(['message'=>'created successfully']);
     }
@@ -91,7 +78,10 @@ class PropertyController extends Controller
      */
     public function show(PropertyShowRequest $request,$id)
     {
-         $property = auth()->user()->properties()->find($id);
+        if (!$this->owner){
+            return  response()->json(['message'=> 'User Not Found']);
+        }
+         $property = $this->owner->properties()->find($id);
          if(!$property){
             return response()->json(['message'=>'Not found']);
          }
@@ -118,12 +108,29 @@ class PropertyController extends Controller
      */
     public function update(PropertyUpdateRequest $request, $id)
     {
-          $property = auth()->user()->properties()->find($id);
+        DB::beginTransaction();
+        if (!$this->owner){
+            return  response()->json(['message'=> 'User Not Found']);
+        }
+          $property = $this->owner->properties()->find($id);
           if(!$property){
             return response()->json(['message'=>'Not found']);
          }
            $property->update($request->only((new Property)->getFillable()));
-           return response()->json(['message'=>'Updated successfully']);
+          if($request->hasFile('images')){
+              $public_path = "/images/property";
+              $property_images = $this->multi_image_upload($request->images,$public_path,$property->id,Property::class);
+          }
+          $images_insert =$property->images()->insert($property_images);
+          if ($images_insert){
+              DB::commit();
+              return response()->json(['message'=>'Updated successfully']);
+          }else{
+              DB::rollBack();
+              return response()->json(['message'=>'Operation Failed']);
+          }
+
+
 
     }
 
@@ -135,11 +142,13 @@ class PropertyController extends Controller
      */
     public function destroy(PropertyDestroyRequest $request,$id)
     {
-        $property = auth()->user()->properties()->find($id);
+        if (!$this->owner){
+            return  response()->json(['message'=> 'User Not Found']);
+        }
+        $property = $this->owner->properties()->find($id);
 
-        if(!$property){
+        if(!$property)
           return response()->json(['message'=>'Not found']);
-       }
         $property->delete();
         return response()->json(['message'=>'Deleted successfully']);
     }
