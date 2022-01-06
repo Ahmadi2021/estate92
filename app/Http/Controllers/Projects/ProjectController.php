@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Services\ProjectService;
 use App\Traits\ImageUpload;
 use App\Traits\UserRole;
+use Carbon\Carbon;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -44,14 +45,36 @@ class ProjectController extends Controller
      */
     public function index(ProjectIndexRequest $request, ProjectService $project_service)
     {
+//        return Carbon::now()->format('y m d');
         if (!$this->owner) {
             return response()->json(['message' => "User Not Found"]);
         }
 
-        $projects = $this->owner->projects()->get();
+
+        $projects = $this->owner->projects()
+            ->select('name','ownerable_id','address', 'created_at', 'id')
+            ->withCount(['floors','units'])
+            ->get();
+
+//        $projects = collect($projects)->map(function ($value,$key){
+////            dd($value);
+//            return $value->id +=1;
+//        });
+//
+//        return $projects;
+//        $grouped = $projects->groupBy(function ($item) {
+//            return $item['created_at'];
+//        });
+//            ->whereBetween('created_at',
+//                [
+//                    $request->start_date,
+//                    $request->end_date
+//                ])
+
+        //
         if (!$projects)
             return response()->json(['message' => 'No Projects found.']);
-
+//        return view('task')->with(['projects'=>$projects]);
         return response()->json(['data' => $projects]);
     }
 

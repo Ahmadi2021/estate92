@@ -8,6 +8,7 @@ use App\Http\Requests\Property\PropertyIndexRequest;
 use App\Http\Requests\Property\PropertyShowRequest;
 use App\Http\Requests\PropertyStoreRequest;
 use App\Http\Requests\PropertyUpdateRequest;
+use App\Models\Employee;
 use App\Models\Property;
 use App\Models\User;
 use App\Traits\ImageUpload;
@@ -30,7 +31,8 @@ class PropertyController extends Controller
 
 
     public function index(PropertyIndexRequest $request)
-    {    if (!$this->owner)
+    {   
+        if (!$this->owner)
                 return  response()->json(['message'=> 'User Not Found']);
         $property =$this->owner->properties()->get();
         if(!$property){

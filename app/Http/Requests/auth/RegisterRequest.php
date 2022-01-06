@@ -29,8 +29,6 @@ class RegisterRequest extends FormRequest
             'password' => ['required'],
             'role' => ['required', Rule::in(['agency','customer'])],
 
-
-            // validations for cusotmer and agency table attributes 
             // share field between agency and custommer
            'name' => ['required', 'string','max:50'],
            'phone_number' =>['required'],
@@ -47,7 +45,7 @@ class RegisterRequest extends FormRequest
            'gender' => ['required_if:role,customer', Rule::in(config('enum.genders'))],
 
 
-           
+
 
 
         ];

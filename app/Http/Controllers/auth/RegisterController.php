@@ -1,66 +1,95 @@
 <?php
 
-namespace App\Http\Controllers\auth;
+namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\auth\RegisterRequest;
-use App\Models\Agency;
 use App\Models\Customer;
+use App\Providers\RouteServiceProvider;
 use App\Models\User;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
-use phpseclib3\System\SSH\Agent;
-use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class RegisterController extends Controller
 {
-    public function register(RegisterRequest $request){
-        DB::beginTransaction();
-        try {
-        $pass = Hash::make($request->password);
+    /*
+    |--------------------------------------------------------------------------
+    | Register Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller handles the registration of new users as well as their
+    | validation and creation. By default this controller uses a trait to
+    | provide this functionality without requiring any additional code.
+    |
+    */
 
-        $request->merge([
-            'password' => $pass
+    use RegistersUsers;
+
+    /**
+     * Where to redirect users after registration.
+     *
+     * @var string
+     */
+    protected $redirectTo = RouteServiceProvider::HOME;
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('guest');
+    }
+
+    /**
+     * Get a validator for an incoming registration request.
+     *
+     * @param  array  $data
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    protected function validator(array $data)
+    {
+        return Validator::make($data, [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role' => ['required', 'string',Rule::in(['customer','agency'])],
         ]);
-        $user = User::create($request->only((new User())->getFillable()));
-        $token = $user->createToken('secret_key')->accessToken;
-        
-        // this line will check the role name inside the ROLE TABLE 
-        // $check_role = Role::findByName($request->role);
-        // this line of code will create the data insdie model_has_role table 
-        // $user->syncRoles($check_role->name);
+    }
 
-        if($request->role == 'customer'){
-            $user->syncRoles('customer');
-            $user->customer()->create($request->only((new Customer)->getFillable()));
-             DB::commit();
-                 return response()->json([
-                     'message' => 'created successfuly',
-                     'token' => $token,
-                ]);
-        }
-        
-        else if($request->role == 'agency'){
-            $user->syncRoles('agency');
-            $user->agency()->create($request->only((new Agency)->getFillable()));
-            DB::commit();
-            return response()->json([
-                'message' => 'created successfuly',
-                'token' => $token,
-                ]);
-            
+    /**
+     * Create a new user instance after a valid registration.
+     *
+     * @param  array  $data
+     * @return \App\Models\User
+     */
+    protected function create(array $data)
+    {
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
+        $user->syncRoles($data['role']);
+        if($data['role'] == 'customer'){
+            $customer =$user->customer()->create([
+                'name'=> $data['name'],
+                'phone_ext'=> $data['phone_ext'],
+                'phone_number'=> $data['phone_number'],
+                'address_1'=> $data['address_1'],
+                'address_2'=> $data['address_2'],
+                'zip_code'=> $data['zip_code'],
+                'website'=> $data['website'],
+                'gender'=> $data['gender'],
+            ]);
+        }elseif($data['role']== 'agency'){
+
         }
 
-          
 
-      }  
-       
-        catch(Exception $exception){
-            DB::rollBack();
-            return response()->json(['message' => $exception->getMessage()]);
-        }
-    
-}
+        return $user;
+    }
 }
