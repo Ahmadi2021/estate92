@@ -21,7 +21,7 @@ trait UserRole {
 
 
     public function check_role($role){
-        
+
         if($role == 'agency'){
 
             return auth()->user()->agency;
@@ -29,9 +29,9 @@ trait UserRole {
         }elseif($role == 'sale-head' || $role == 'sale-manager' || $role == 'csr'){
 
             return auth()->user()->employee;
-            
+
         }elseif($role == 'customer'){
-            return (new User);
+            return auth()->user()->customer;
         }
     }
 }

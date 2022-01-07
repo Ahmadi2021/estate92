@@ -53,11 +53,28 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', 'string',Rule::in(['customer','agency'])],
-        ]);
+            'email'=> ['required', 'string', 'max:50', 'unique:users,email'],
+            'password' => ['required'],
+            'role' => ['required', Rule::in(['agency','customer'])],
+
+            // share field between agency and custommer
+            'name' => ['required', 'string','max:50'],
+            'phone_number' =>['required'],
+            'phone_ext' =>['required'],
+            //agency required
+            'logo' => ['required_if:role,agency'],
+            'qr_code' => ['required_if:role,agency'],
+            'uuid' => ['required_if:role,agency'],
+            // customer required
+            'address_1' => ['required_if:role,customer'],
+            'address_2' => ['required_if:role,customer'],
+            'zip_code' => ['required_if:role,customer'],
+            'website' => ['required_if:role,customer'],
+            'gender' => ['required_if:role,customer', Rule::in(config('enum.genders'))],
+
+            ]);
+
+
     }
 
     /**
@@ -86,10 +103,12 @@ class RegisterController extends Controller
                 'gender'=> $data['gender'],
             ]);
         }elseif($data['role']== 'agency'){
+            $agency =  $user->agency()->create([
+                'name'=> $data['name'],
+                ''=> $data['name'],
+            ]);
 
         }
-
-
         return $user;
     }
 }

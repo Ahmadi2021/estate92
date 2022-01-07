@@ -21,6 +21,7 @@ use App\Http\Controllers\Projects\UnitController;
 //    return  $user->email;
 //    return view('welcome');
 //});
+Auth::routes();
 
 Route::redirect('/', '/home');
 Route::get('test',function(){
@@ -28,12 +29,9 @@ Route::get('test',function(){
 })->middleware('auth');
 
 //Route::resource('task',UnitController::class);
-//Auth::routes();
-//Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-// Protected Route
+
 
 Route::group(['middleware' => ['auth']], function () {
-Auth::routes();
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('projects', \App\Http\Controllers\Projects\ProjectController::class);
 });

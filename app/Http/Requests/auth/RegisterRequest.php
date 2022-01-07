@@ -42,7 +42,8 @@ class RegisterRequest extends FormRequest
            'address_2' => ['required_if:role,customer'],
            'zip_code' => ['required_if:role,customer'],
            'website' => ['required_if:role,customer'],
-           'gender' => ['required_if:role,customer', Rule::in(config('enum.genders'))],
+           'gender' => ['required_if:role,customer', Rule::in(config('enum.genders'))
+           ],
 
 
 

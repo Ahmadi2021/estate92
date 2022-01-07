@@ -24,7 +24,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
-
 class ProjectController extends Controller
 {
     use ImageUpload, UserRole;
@@ -43,19 +42,20 @@ class ProjectController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(ProjectIndexRequest $request, ProjectService $project_service)
+    public function index(Request $request, ProjectService $project_service)
     {
+//        dd('hello');
 //        return Carbon::now()->format('y m d');
         if (!$this->owner) {
             return response()->json(['message' => "User Not Found"]);
         }
+        if(auth()->user()->role )
+            $projects = Project::with('floors.units')->withCount('floors','units')->get();
 
-
-        $projects = $this->owner->projects()
-            ->select('name','ownerable_id','address', 'created_at', 'id')
-            ->withCount(['floors','units'])
-            ->get();
-
+//            $projects = $this->owner->projects()
+//                ->select('name','ownerable_id','address', 'created_at', 'id')
+//                ->withCount(['floors','units'])
+//                ->get();
 //        $projects = collect($projects)->map(function ($value,$key){
 ////            dd($value);
 //            return $value->id +=1;

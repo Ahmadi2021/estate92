@@ -31,4 +31,6 @@ class Customer extends Model
      public function properties(){
         return $this->hasMany(User::class);
     }
+
+
 }
