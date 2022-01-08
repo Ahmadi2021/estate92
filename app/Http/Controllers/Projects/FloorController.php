@@ -36,7 +36,6 @@ class FloorController extends Controller
      */
     public function index(FloorIndexRequest $request)
     {
-
         if(!$this->owner)
             return  response()->json(['message'=>'No User found']);
         $project = $this->owner->projects()->find($request->project_id);
@@ -96,6 +95,9 @@ class FloorController extends Controller
     {
        if(!$this->owner){
            return  response()->json(['message'=>'User Not Found']);
+       }
+       if(auth()-user()->hasRole){
+
        }
         $project = $this->owner->projects()->find($request->project_id);
         if(!$project)

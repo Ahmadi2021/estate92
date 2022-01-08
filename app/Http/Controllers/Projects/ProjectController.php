@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Projects;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProjectIndexRequest;
 use App\Http\Requests\Projects\ProjectShowRequest;
@@ -49,19 +48,15 @@ class ProjectController extends Controller
         if (!$this->owner) {
             return response()->json(['message' => "User Not Found"]);
         }
-        if(auth()->user()->role )
-            $projects = Project::with('floors.units')->withCount('floors','units')->get();
-
-//            $projects = $this->owner->projects()
-//                ->select('name','ownerable_id','address', 'created_at', 'id')
-//                ->withCount(['floors','units'])
-//                ->get();
+        if(auth()->user()->hasRole('agency') || auth()->user()->hasRole('sale-head') || auth()->user()->hasRole('sale-manager')){
+            $projects = $this->owner->projects()
+                ->select('name','ownerable_id','address', 'created_at', 'id')
+                ->withCount(['floors','units'])
+                ->get();
 //        $projects = collect($projects)->map(function ($value,$key){
 ////            dd($value);
 //            return $value->id +=1;
 //        });
-//
-//        return $projects;
 //        $grouped = $projects->groupBy(function ($item) {
 //            return $item['created_at'];
 //        });
@@ -70,12 +65,16 @@ class ProjectController extends Controller
 //                    $request->start_date,
 //                    $request->end_date
 //                ])
-
-        //
+        }elseif(auth()->user()->hasRole('customer')) {
+            $projects = Project::with('floors.units')
+                ->withCount('floors', 'units')
+                ->get();
+        }
+//
         if (!$projects)
             return response()->json(['message' => 'No Projects found.']);
-//        return view('task')->with(['projects'=>$projects]);
-        return response()->json(['data' => $projects]);
+        return view('task')->with(['projects'=>$projects]);
+//        return response()->json(['data' => $projects]);
     }
 
     /**
@@ -131,10 +130,10 @@ class ProjectController extends Controller
          if(!$this->owner)
              return response()->json(['message'=> 'User Not Found']);
         $project = $this->owner->projects()
-            ->with(['floors'=> function($query){
-                $query->with(['units'=>function($q){
+            ->with(['floors'=> function($query) use($request){
+                $query->with(['units'=>function($q) use($request){
                     $q->where('type' , 'shop')
-                        ->where('price', '>' , 500)
+                        ->whereBetween('price',[$request->minPrice,10000])
                         ->select(['id','name','price','floor_id','type']);
 
                 }])->select(['id','name','project_id'])

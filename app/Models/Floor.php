@@ -14,13 +14,13 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Floor extends Model
 {
-
+    use HasFactory;
     protected $fillable = [
         'name',
         'description',
         'project_id',
     ];
-    use HasFactory;
+
     public function project(){
         return $this->belongsTo(Project::class);
     }

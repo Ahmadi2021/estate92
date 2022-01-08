@@ -6,19 +6,19 @@
         <tr>
             <th scope="col">#</th>
             <th scope="col">project</th>
-            <th scope="col">floors</th>
-            <th scope="col">units</th>
+            <th scope="col">floors Count</th>
+            <th scope="col">units Count</th>
         </tr>
         </thead>
         <tbody>
-{{--        @foreach($data as d)--}}
-{{--        <tr>--}}
-{{--            <th scope="row">1</th>--}}
-{{--            <td>{{d->name}}</td>--}}
-{{--            <td>{{d->floors_count}}</td>--}}
-{{--            <td>{{d->units_count}}</td>--}}
-{{--        </tr>--}}
-{{--        @endforeach--}}
+        @foreach($projects as $proj)
+        <tr>
+            <th scope="row">1</th>
+            <td>{{$proj->name}}</td>
+            <td>{{$proj->floors_count}}</td>
+            <td>{{$proj->units_count}}</td>
+        </tr>
+        @endforeach
         </tbody>
     </table>
 @endsection
